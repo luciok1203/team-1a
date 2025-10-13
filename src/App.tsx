@@ -1,16 +1,8 @@
-import { useState } from 'react';
+import React from 'react';
+import SignupPage from './SignupPage';
 
-const App = () => {
-  const [count, setCount] = useState(0);
-
-  return (
-    <div>
-      <p>Hello World!</p>
-      <button onClick={() => setCount((count) => count + 1)}>
-        Count is {count}
-      </button>
-    </div>
-  );
-};
+function App() {
+  return <SignupPage />;
+}
 
 export default App;
