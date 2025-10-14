@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
-import './LoginPage.css';
-import { Link } from 'react-router-dom';
+// LoginPage.tsx
 
-const LoginPage: React.FC = () => {
+import axios, { AxiosError } from 'axios';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+import './LoginPage.css';
+
+const API_BASE = 'https://api-internhasha.wafflestudio.com';
+
+const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  const { setToken } = useAuth();
+
+  async function handleLogin() {
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/user/session`, {
+        email: formData.email + '@snu.ac.kr',
+        password: formData.password,
+      });
+      setToken(res.data.token);
+      localStorage.setItem('authToken', res.data.token);
+    } catch (error) {
+      const err = error as AxiosError;
+      console.error(err.response?.data);
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -15,7 +37,7 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`로그인 시도: ${formData.email}@snu.ac.kr`);
+    handleLogin();
   };
 
   return (
@@ -25,7 +47,7 @@ const LoginPage: React.FC = () => {
         <div className="logo">스누인턴</div>
         <nav className="nav">
           <Link to="/signup">회원가입</Link>
-          <Link to="/">로그인</Link>
+          <Link to="/login">로그인</Link>
         </nav>
       </header>
 

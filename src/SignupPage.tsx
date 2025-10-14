@@ -1,11 +1,22 @@
-import axios from 'axios';
-import React, { useState } from 'react';
+// SignupPage.tsx
 
-import './SignupPage.css';
+import axios, { AxiosError } from 'axios';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+import './SignupPage.css';
+
+const API_BASE = 'https://api-internhasha.wafflestudio.com';
 
 const SignupPage = () => {
-  const API_BASE = 'https://api-internhasha.wafflestudio.com';
+  const { setToken } = useAuth();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    password: '',
+    confirmPassword: '',
+    email: '',
+  });
 
   async function handleSignUp() {
     try {
@@ -19,18 +30,13 @@ const SignupPage = () => {
           successCode: '1234',
         },
       });
-      console.log('성공', res.data.token);
+      setToken(res.data.token);
+      localStorage.setItem('authToken', res.data.token);
     } catch (error) {
-      console.error('실패', error);
+      const err = error as AxiosError;
+      console.error(err.response?.data);
     }
   }
-
-  const [formData, setFormData] = useState({
-    name: '',
-    password: '',
-    confirmPassword: '',
-    email: '',
-  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -53,7 +59,7 @@ const SignupPage = () => {
         <div className="logo">스누인턴</div>
         <nav className="nav">
           <Link to="/signup">회원가입</Link>
-          <Link to="/">로그인</Link>
+          <Link to="/login">로그인</Link>
         </nav>
       </header>
 
