@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useState } from 'react';
 
 import './SignupPage.css';
+import { Link } from 'react-router-dom';
 
 const SignupPage = () => {
   const API_BASE = 'https://api-internhasha.wafflestudio.com';
@@ -51,8 +52,8 @@ const SignupPage = () => {
       <header className="header">
         <div className="logo">스누인턴</div>
         <nav className="nav">
-          <a href="#">회원가입</a>
-          <a href="#">로그인</a>
+          <Link to="/signup">회원가입</Link>
+          <Link to="/">로그인</Link>
         </nav>
       </header>
 
