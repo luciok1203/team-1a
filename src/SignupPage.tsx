@@ -1,7 +1,29 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+
 import './SignupPage.css';
 
-const SignupPage: React.FC = () => {
+const SignupPage = () => {
+  const API_BASE = 'https://api-internhasha.wafflestudio.com';
+
+  async function handleSignUp() {
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/user`, {
+        authType: 'APPLICANT',
+        info: {
+          type: 'APPLICANT',
+          name: formData.name,
+          email: formData.email + '@snu.ac.kr',
+          password: formData.password,
+          successCode: '1234',
+        },
+      });
+      console.log('성공', res.data.token);
+    } catch (error) {
+      console.error('실패', error);
+    }
+  }
+
   const [formData, setFormData] = useState({
     name: '',
     password: '',
@@ -20,7 +42,7 @@ const SignupPage: React.FC = () => {
       alert('비밀번호가 일치하지 않습니다.');
       return;
     }
-    alert('회원가입이 완료되었습니다!');
+    handleSignUp();
   };
 
   return (
