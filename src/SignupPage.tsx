@@ -1,14 +1,45 @@
-import React, { useState } from 'react';
-import './SignupPage.css';
-import { Link } from 'react-router-dom';
+// SignupPage.tsx
 
-const SignupPage: React.FC = () => {
+import axios, { AxiosError } from 'axios';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+import './SignupPage.css';
+
+const API_BASE = 'https://api-internhasha.wafflestudio.com';
+
+const SignupPage = () => {
+  const { setToken } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     password: '',
     confirmPassword: '',
     email: '',
   });
+
+  const navigate = useNavigate();
+
+  async function handleSignUp() {
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/user`, {
+        authType: 'APPLICANT',
+        info: {
+          type: 'APPLICANT',
+          name: formData.name,
+          email: formData.email + '@snu.ac.kr',
+          password: formData.password,
+          successCode: '1234',
+        },
+      });
+      setToken(res.data.token);
+      localStorage.setItem('authToken', res.data.token);
+      navigate('/');
+    } catch (error) {
+      const err = error as AxiosError;
+      console.error(err.response?.data);
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -21,7 +52,7 @@ const SignupPage: React.FC = () => {
       alert('비밀번호가 일치하지 않습니다.');
       return;
     }
-    alert('회원가입이 완료되었습니다!');
+    handleSignUp();
   };
 
   return (
@@ -31,7 +62,7 @@ const SignupPage: React.FC = () => {
         <div className="logo">스누인턴</div>
         <nav className="nav">
           <Link to="/signup">회원가입</Link>
-          <Link to="/">로그인</Link>
+          <Link to="/login">로그인</Link>
         </nav>
       </header>
 
