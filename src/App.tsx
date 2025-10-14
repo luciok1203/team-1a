@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import React from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import LoginPage from './LoginPage';
+import SignupPage from './SignupPage';
 
-const App = () => {
-  const [count, setCount] = useState(0);
-
+const App: React.FC = () => {
   return (
-    <div>
-      <p>Hello World!</p>
-      <button onClick={() => setCount((count) => count + 1)}>
-        Count is {count}
-      </button>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
+    </Router>
   );
 };
 
