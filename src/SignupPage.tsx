@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './SignupPage.css';
+import { Link } from 'react-router-dom';
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -29,8 +30,8 @@ const SignupPage: React.FC = () => {
       <header className="header">
         <div className="logo">스누인턴</div>
         <nav className="nav">
-          <a href="#">회원가입</a>
-          <a href="#">로그인</a>
+          <Link to="/signup">회원가입</Link>
+          <Link to="/">로그인</Link>
         </nav>
       </header>
 
