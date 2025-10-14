@@ -4,7 +4,7 @@ import axios, { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import './LoginPage.css';
+import './HomePage.css';
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
 
@@ -39,18 +39,16 @@ const LoginPage = () => {
       <header className="header">
         <div className="logo">스누인턴</div>
         <nav className="nav">
-          {name ? <div>{name}님</div> : <Link to="/signup">회원가입</Link>}
+          {name ? <span>{name}님</span> : <Link to="/signup">회원가입</Link>}
           {name ? (
-            <div onClick={logout}>로그아웃</div>
+            <a onClick={logout}>로그아웃</a>
           ) : (
             <Link to="/login">로그인</Link>
           )}
         </nav>
       </header>
 
-      <main>
-        <h1></h1>
-      </main>
+      <main>{name ? <h1>{name}님 환영합니다.</h1> : null}</main>
     </div>
   );
 };

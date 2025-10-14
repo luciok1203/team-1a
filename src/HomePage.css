@@ -1,0 +1,59 @@
+/* 기본 설정 */
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.logo {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1e3a8a;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  white-space: nowrap; /* ✅ 줄바꿈 방지 */
+}
+
+/* 🔹 공통 스타일 (회원가입 / 로그인 / 로그아웃 / 이름 표시용 모두 동일 기본 스타일) */
+.nav a,
+.nav span {
+  margin-left: 24px;
+  text-decoration: none;
+  color: #333;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* 🔹 hover 효과 — LoginPage.css와 동일 (색상만 진하게) */
+.nav a:hover {
+  color: #000;
+}
+
+/* 🔹 이름 표시용 span — hover 효과 제거 */
+.nav span {
+  cursor: default;
+}
+.nav span:hover {
+  color: #333;
+}

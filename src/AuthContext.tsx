@@ -1,6 +1,6 @@
 // AuthContext.tsx
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
@@ -26,14 +26,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       try {
         // 🔹 서버에 /api/auth/me 요청으로 토큰 유효성 확인
-        const res = await axios.get(`${API_BASE}/api/auth/me`, {
+        await axios.get(`${API_BASE}/api/auth/me`, {
           headers: { Authorization: `Bearer ${saved}` },
         });
-        console.log(res.data);
         // ✅ 유효하면 전역 상태에 반영
         setToken(saved);
-      } catch {
-        console.warn('❌ 토큰이 만료되었거나 유효하지 않습니다.');
+      } catch (error) {
+        const err = error as AxiosError;
+        console.error(err.response?.data || err.message);
         localStorage.removeItem('authToken');
         setToken(null);
       }

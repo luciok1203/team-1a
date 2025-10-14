@@ -2,7 +2,7 @@
 
 import axios, { AxiosError } from 'axios';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import './SignupPage.css';
 
@@ -18,6 +18,8 @@ const SignupPage = () => {
     email: '',
   });
 
+  const navigate = useNavigate();
+
   async function handleSignUp() {
     try {
       const res = await axios.post(`${API_BASE}/api/auth/user`, {
@@ -32,6 +34,7 @@ const SignupPage = () => {
       });
       setToken(res.data.token);
       localStorage.setItem('authToken', res.data.token);
+      navigate('/');
     } catch (error) {
       const err = error as AxiosError;
       console.error(err.response?.data);
