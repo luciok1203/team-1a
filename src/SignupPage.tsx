@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './SignupPage.css';
 import { Link } from 'react-router-dom';
+import PasswordInput from './PasswordInput';
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -50,27 +51,19 @@ const SignupPage: React.FC = () => {
             />
           </label>
 
-          <label>
-            비밀번호
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <PasswordInput
+            label="비밀번호"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
-          <label>
-            비밀번호 확인
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <PasswordInput
+            label="비밀번호 확인"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+          />
 
           <label>
             이메일
