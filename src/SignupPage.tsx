@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import PasswordInput from './PasswordInput';
 import './SignupPage.css';
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
@@ -81,27 +82,19 @@ const SignupPage = () => {
             />
           </label>
 
-          <label>
-            비밀번호
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <PasswordInput
+            label="비밀번호"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
-          <label>
-            비밀번호 확인
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <PasswordInput
+            label="비밀번호 확인"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+          />
 
           <label>
             이메일
