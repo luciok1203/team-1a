@@ -4,26 +4,29 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSaveMode": "file",
 
-  // ★ 언어별로 Biome를 기본 포맷터로 지정 (전역 기본 포맷터는 제거)
+  // ★ 언어별로 Biome를 기본 포맷터로 지정
   "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
   "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
   "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
   "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
 
+  // ✅ JSON / JSONC 파일도 Biome으로 자동 포맷
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+
   // Biome 확장 동작
   "biome.enabled": true,
   "biome.useWorkspace": true,
-  // 프로젝트에 biome 설정 파일이 없어도 동작하게 하려면(선택):
-  // "biome.requireConfig": false,
+  // "biome.requireConfig": false, // 설정 파일 없어도 동작하게 하려면 주석 해제
 
-  // 저장 시 Biome 액션들 실행
+  // 저장 시 Biome 액션 실행
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit",
     "quickfix.biome": "explicit"
   },
 
-  // 다른 포맷터 끄기(이미 잘 해둠)
+  // 다른 포맷터 끄기
   "prettier.enable": false,
   "eslint.enable": false
 }
