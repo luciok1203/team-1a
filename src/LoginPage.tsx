@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import PasswordInput from './PasswordInput';
 import './LoginPage.css';
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
@@ -73,16 +74,12 @@ const LoginPage = () => {
             </div>
           </label>
 
-          <label>
-            비밀번호
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <PasswordInput
+            label="비밀번호"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
           <div className="signup-link">
             아직 계정이 없으신가요?{' '}
