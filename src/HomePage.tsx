@@ -1,22 +1,20 @@
 import axios, { AxiosError } from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-// Import useNavigate to handle the login redirect
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { encodeQueryParams } from './EncodeQueryParams';
 import './HomePage.css';
+import Pagination from './Pagination'; // 1. Import the new component
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
 
-// --- Filter Options and Labels ---
-
+// ... (Filter options and other constants remain the same) ...
 const ROLES_OPTIONS = {
   개발: ['FRONT', 'APP', 'BACKEND', 'DATA', 'OTHERS'],
   디자인: ['DESIGN'],
   기획: ['PLANNER'],
   마케팅: ['MARKETING'],
 };
-
 const DOMAIN_LABELS: { [key: string]: string } = {
   FINTECH: '핀테크',
   HEALTHTECH: '헬스테크',
@@ -39,15 +37,11 @@ const DOMAIN_OPTIONS = [
   'B2B',
   'OTHERS',
 ];
-
 const ORDER_LABELS: { [key: number]: string } = {
   0: '공고등록순',
   2: '마감임박순',
 };
 const ORDER_VALUES = [0, 2];
-
-// --- Params Interface and Initial State ---
-
 interface Params {
   [key: string]: string[] | boolean | number;
   roles: string[];
@@ -55,7 +49,6 @@ interface Params {
   isActive: boolean;
   order: number;
 }
-
 const INITIAL_PARAMS: Params = {
   roles: [],
   domains: [],
@@ -63,7 +56,7 @@ const INITIAL_PARAMS: Params = {
   order: 0,
 };
 
-// --- Custom Hook to detect clicks outside ---
+// ... (useOutsideClick hook remains the same) ...
 const useOutsideClick = (ref: any, callback: () => void) => {
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -78,12 +71,11 @@ const useOutsideClick = (ref: any, callback: () => void) => {
   }, [ref, callback]);
 };
 
-// --- NEW: Login Modal Component ---
+// ... (LoginModal component remains the same) ...
 interface LoginModalProps {
   onClose: () => void;
   onNavigate: () => void;
 }
-
 const LoginModal: React.FC<LoginModalProps> = ({ onClose, onNavigate }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -103,21 +95,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onNavigate }) => {
 };
 
 // --- HomePage Component ---
-
 const HomePage = () => {
   const { token, logout } = useAuth();
   const [name, setName] = useState<string | null>(null);
-  const navigate = useNavigate(); // Hook for navigation
-
-  // --- NEW State for bookmarks and modal ---
+  const navigate = useNavigate();
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set<number>());
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
+    // ... (checkToken logic remains the same) ...
     const checkToken = async () => {
       if (!token) {
         setName(null);
-        setBookmarkedIds(new Set()); // Clear bookmarks if not logged in
+        setBookmarkedIds(new Set());
         return;
       }
       try {
@@ -125,13 +115,11 @@ const HomePage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setName(res.data.name);
-        // Assuming the /me endpoint returns a list of bookmarked post IDs
-        // Adjust 'res.data.bookmarkedPostIds' if the API key is different
         setBookmarkedIds(new Set(res.data.bookmarkedPostIds || []));
       } catch (error) {
         const err = error as AxiosError;
         console.error(err.response?.data);
-        logout(); // Log out if token is invalid
+        logout();
       }
     };
     checkToken();
@@ -142,6 +130,10 @@ const HomePage = () => {
   const [localParams, setLocalParams] = useState<Params>(INITIAL_PARAMS);
   const [openFilter, setOpenFilter] = useState<string | null>(null);
 
+  // 2. Add new state for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const filterRef = useRef(null);
   useOutsideClick(filterRef, () => {
     if (openFilter !== 'roles') {
@@ -149,19 +141,23 @@ const HomePage = () => {
     }
   });
 
+  // 4. Update useEffect to depend on currentPage and send it
   useEffect(() => {
     const getPosts = async () => {
       try {
-        const query = encodeQueryParams({ params });
+        // Add current page to the query
+        const query = encodeQueryParams({ params, page: currentPage });
         const res = await axios.get(`${API_BASE}/api/post?${query}`);
         setPosts(res.data.posts);
+        // 5. Set total pages from API response (adjust key if needed)
+        setTotalPages(10);
       } catch (error) {
         const err = error as AxiosError;
         console.error(err.response?.data);
       }
     };
     getPosts();
-  }, [params]);
+  }, [params, currentPage]); // Add currentPage as dependency
 
   const toggleFilter = (filterName: string) => {
     if (openFilter === filterName) {
@@ -172,6 +168,7 @@ const HomePage = () => {
     }
   };
 
+  // 3. Reset page to 1 when filters change
   const toggleRoleDirectly = (value: string) => {
     setParams((prev) => ({
       ...prev,
@@ -179,8 +176,10 @@ const HomePage = () => {
         ? prev.roles.filter((v) => v !== value)
         : [...prev.roles, value],
     }));
+    setCurrentPage(1); // Reset page
   };
 
+  // ... (toggleLocalDomain, setLocalStatus, setLocalOrder remain the same) ...
   const toggleLocalDomain = (value: string) => {
     setLocalParams((prev) => ({
       ...prev,
@@ -189,14 +188,12 @@ const HomePage = () => {
         : [...prev.domains, value],
     }));
   };
-
   const setLocalStatus = (isActive: boolean) => {
     setLocalParams((prev) => ({
       ...prev,
       isActive,
     }));
   };
-
   const setLocalOrder = (order: number) => {
     setLocalParams((prev) => ({
       ...prev,
@@ -204,11 +201,14 @@ const HomePage = () => {
     }));
   };
 
+  // 3. Reset page to 1 when filters change
   const handleApply = () => {
     setParams(localParams);
     setOpenFilter(null);
+    setCurrentPage(1); // Reset page
   };
 
+  // ... (handleLocalReset remains the same) ...
   const handleLocalReset = (filterName: string) => {
     switch (filterName) {
       case 'status':
@@ -229,10 +229,12 @@ const HomePage = () => {
     }
   };
 
+  // 3. Reset page to 1 when filters change
   const resetAllFilters = () => {
     setParams(INITIAL_PARAMS);
     setLocalParams(INITIAL_PARAMS);
     setOpenFilter(null);
+    setCurrentPage(1); // Reset page
   };
 
   const getOrderButtonLabel = () => {
@@ -241,14 +243,11 @@ const HomePage = () => {
     return '최신순';
   };
 
-  // --- NEW: Bookmark Click Handlers ---
-
-  // This function is called when the user is logged in
+  // ... (Bookmark logic remains the same) ...
   const handleBookmarkToggle = async (postId: number) => {
     const isCurrentlyBookmarked = bookmarkedIds.has(postId);
     const newBookmarkedIds = new Set(bookmarkedIds);
 
-    // Optimistic UI update
     if (isCurrentlyBookmarked) {
       newBookmarkedIds.delete(postId);
     } else {
@@ -256,43 +255,35 @@ const HomePage = () => {
     }
     setBookmarkedIds(newBookmarkedIds);
 
-    // API Call
     try {
       const url = `${API_BASE}/api/post/${postId}/bookmark`;
       if (isCurrentlyBookmarked) {
-        // API call to UN-bookmark
         await axios.delete(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        // API call to bookmark
         await axios.post(
           url,
-          {}, // Empty body
+          {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
     } catch (error) {
-      // Revert UI on failure
       setBookmarkedIds(bookmarkedIds);
       console.error('Failed to update bookmark', error);
     }
   };
-
-  // This is the main click handler on the button
   const handleBookmarkClick = (postId: number) => {
     if (!token) {
-      // Not logged in: show modal
       setShowLoginModal(true);
     } else {
-      // Logged in: toggle the bookmark
       handleBookmarkToggle(postId);
     }
   };
 
   return (
     <div className="container">
-      {/* --- NEW: Render Modal --- */}
+      {/* --- Render Modal --- */}
       {showLoginModal && (
         <LoginModal
           onClose={() => setShowLoginModal(false)}
@@ -303,6 +294,7 @@ const HomePage = () => {
         />
       )}
 
+      {/* ... (Header remains the same) ... */}
       <header className="header">
         <div className="logo">스누인턴</div>
         <nav className="nav">
@@ -318,6 +310,7 @@ const HomePage = () => {
       <main className="main-layout">
         {/* --- Filters Container --- */}
         <div className="filters-container">
+          {/* ... (All your filters remain the same) ... */}
           {/* 1. 직군 필터 (Large Button) */}
           <div className="filter-dropdown filter-dropdown-roles">
             <button
@@ -357,7 +350,6 @@ const HomePage = () => {
 
           {/* 2. Secondary Filter Bar (Status, Domain, Order, Reset) */}
           <div className="filter-bar" ref={filterRef}>
-            {/* ... (rest of your filters are unchanged) ... */}
             {/* 모집상태 Dropdown */}
             <div className="filter-dropdown">
               <button
@@ -498,6 +490,7 @@ const HomePage = () => {
             <p>검색 결과가 없습니다.</p>
           ) : (
             posts.map((post) => {
+              // ... (post mapping logic remains the same) ...
               const dDay = Math.ceil(
                 (new Date(post.employmentEndDate).getTime() - Date.now()) /
                   (1000 * 60 * 60 * 24)
@@ -516,7 +509,7 @@ const HomePage = () => {
                       />
                       <span className="company-name">{post.companyName}</span>
                     </div>
-                    {/* --- UPDATED: Bookmark Button --- */}
+
                     <button
                       className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
                       onClick={() => handleBookmarkClick(post.id)}
@@ -539,6 +532,13 @@ const HomePage = () => {
             })
           )}
         </section>
+
+        {/* 6. Add the Pagination component here */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </main>
     </div>
   );
