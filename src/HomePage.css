@@ -1,10 +1,10 @@
-/* 기본 설정 */
 body {
   font-family: "Noto Sans KR", sans-serif;
   background-color: #fff;
   margin: 0;
   padding: 0;
-  text-align: center;
+  /* Set background for the whole page to match screenshot context */
+  background-color: #f9fafb; 
 }
 
 .container {
@@ -13,7 +13,6 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -32,10 +31,8 @@ body {
 .nav {
   display: flex;
   align-items: center;
-  white-space: nowrap; /* ✅ 줄바꿈 방지 */
 }
 
-/* 🔹 공통 스타일 (회원가입 / 로그인 / 로그아웃 / 이름 표시용 모두 동일 기본 스타일) */
 .nav a,
 .nav span {
   margin-left: 24px;
@@ -45,15 +42,401 @@ body {
   cursor: pointer;
 }
 
-/* 🔹 hover 효과 — LoginPage.css와 동일 (색상만 진하게) */
 .nav a:hover {
   color: #000;
 }
 
-/* 🔹 이름 표시용 span — hover 효과 제거 */
-.nav span {
-  cursor: default;
+/* ---- New Filter Bar ---- */
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 0 20px;
+  position: relative;
+  box-sizing: border-box;
 }
-.nav span:hover {
+
+.filter-dropdown-roles {
+  width: 100%;
+  position: relative;
+}
+
+.filter-btn-roles {
+  width: 100%;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn-roles:hover {
+  background-color: #e5e7eb;
+}
+.filter-btn-roles.active {
+  border-color: #1e3a8a;
+  background-color: #f3f4f6;
+  color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+/* Animated arrow on the roles filter button */
+.filter-arrow {
+  transition: transform 0.3s ease-out;
+}
+.filter-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Styles for the sliding roles filter container */
+.roles-dropdown-wrapper {
+  /* This is the animation */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-out, opacity 0.3s ease-out;
+
+  /* This is the styling */
+  background: #fff; /* Keep the white background */
+  text-align: left;
+  /* Removed border, border-radius, box-shadow, and margin-top */
+}
+.roles-dropdown-wrapper.open {
+  /* Set to a value larger than your content will ever be */
+  max-height: 600px; 
+  opacity: 1;
+}
+
+.filter-bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn:hover {
+  background-color: #f9fafb;
+}
+.filter-btn.active {
+  border-color: #1e3a8a;
+  color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+.btn-reset-all {
+  margin-left: auto;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.btn-reset-all:hover {
+  background-color: #f1f1f1;
+}
+
+
+/* ---- Dropdown Menu Content ---- */
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 280px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  z-index: 100;
+  text-align: left;
+  overflow: hidden;
+}
+
+.dropdown-content {
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.radio-option,
+.checkbox-option {
+  display: block;
+  padding: 6px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+.radio-option input,
+.checkbox-option input {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.filter-group {
+  margin-bottom: 12px;
+}
+.filter-group h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin: 8px 0 4px;
+}
+
+.dropdown-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #f1f1f1;
+  background-color: #f9fafb;
+}
+
+.btn-reset {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-reset:hover {
+  color: #111;
+}
+
+.btn-apply {
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-apply:hover {
+  background-color: #1c337a;
+}
+
+/* ---- Job Card List ---- */
+.job-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f9fafb; /* Match page background */
+}
+
+/* ---- Job Card (Styles updated to match screenshot) ---- */
+.job-card {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 24px;
+  text-align: left;
+  border: 1px solid #f1f1f1;
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  /* Removed hover effect to match clean screenshot */
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align logo to top, bookmark to top */
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Increased gap */
+}
+
+.company-logo {
+  width: 48px; /* Bigger logo */
+  height: 48px;
+  border-radius: 8px; /* Rounded square */
+  object-fit: cover;
+  border: 1px solid #f1f1f1;
+}
+
+.company-name {
+  font-size: 16px; /* Bigger text */
+  font-weight: 600; /* Bolder */
   color: #333;
+}
+
+/* Styled bookmark to match screenshot */
+.bookmark-btn {
+  background: #333; /* Dark color */
+  border: none;
+  cursor: pointer;
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  /* This creates the tag shape */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+}
+.bookmark-btn:hover {
+  background: #000;
+}
+
+
+.job-title {
+  font-size: 22px; /* Much bigger title */
+  font-weight: 700;
+  margin: 20px 0 12px; /* Adjusted spacing */
+  color: #111;
+}
+
+.job-meta {
+  /* This div now only holds the tag */
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.job-tag {
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  padding: 4px 10px; /* More padding */
+  font-size: 14px; /* Slightly larger tag */
+  font-weight: 500;
+  color: #333;
+}
+
+/* New style for deadline to position it correctly */
+.job-deadline {
+  display: block; /* Make it a block element */
+  text-align: right; /* Align text to the right */
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+  /* Pull it up to align with tag row */
+  margin-top: -30px; 
+}
+
+.job-summary {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.5;
+  margin-top: 20px; /* Add space above summary */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ---- THE FINAL BOOKMARK FIX ---- */
+
+/* ---- Updated Bookmark Button Styles ---- */
+
+.bookmark-btn {
+  /* Default "unselected" state (a solid, light grey shape) */
+  background: #E5E7EB; /* Use a light grey for the fill */
+  border: 1px solid #E5E7EB; /* Make the border the *same* light grey */
+  cursor: pointer;
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.bookmark-btn.bookmarked {
+  /* "Filled" state (a solid, dark shape) */
+  background: #333; /* Dark fill */
+  border-color: #333; /* Make the border the *same* dark color */
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  text-align: center;
+  max-width: 350px;
+  width: 90%;
+  box-sizing: border-box;
+}
+
+.modal-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px;
+}
+
+.modal-content p {
+  font-size: 15px;
+  color: #555;
+  margin: 2px 0;
+}
+
+.modal-btn-login {
+  display: block;
+  width: 100%;
+  background-color: #4B5563; /* Dark grey */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+}
+
+.modal-btn-cancel {
+  display: block;
+  width: 100%;
+  background-color: #F3F4F6; /* Light grey */
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
 }

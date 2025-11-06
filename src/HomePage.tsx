@@ -1,13 +1,14 @@
-// HomePage.tsx
-
 import axios, { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+// Import useNavigate to handle the login redirect
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { encodeQueryParams } from './EncodeQueryParams';
 import './HomePage.css';
 
 const API_BASE = 'https://api-internhasha.wafflestudio.com';
+
+// --- Filter Options and Labels ---
 
 const ROLES_OPTIONS = {
   개발: ['FRONT', 'APP', 'BACKEND', 'DATA', 'OTHERS'],
@@ -16,6 +17,17 @@ const ROLES_OPTIONS = {
   마케팅: ['MARKETING'],
 };
 
+const DOMAIN_LABELS: { [key: string]: string } = {
+  FINTECH: '핀테크',
+  HEALTHTECH: '헬스테크',
+  EDUCATION: '교육',
+  ECOMMERCE: '이커머스',
+  FOODTECH: '푸드테크',
+  MOBILITY: '모빌리티',
+  CONTENTS: '컨텐츠',
+  B2B: 'B2B',
+  OTHERS: '기타',
+};
 const DOMAIN_OPTIONS = [
   'FINTECH',
   'HEALTHTECH',
@@ -28,47 +40,113 @@ const DOMAIN_OPTIONS = [
   'OTHERS',
 ];
 
-const ORDER_OPTIONS = [
-  { value: 0, label: '최신순' },
-  { value: 1, label: '조회수순' },
-  { value: 2, label: '마감임박순' },
-];
+const ORDER_LABELS: { [key: number]: string } = {
+  0: '공고등록순',
+  2: '마감임박순',
+};
+const ORDER_VALUES = [0, 2];
+
+// --- Params Interface and Initial State ---
+
+interface Params {
+  [key: string]: string[] | boolean | number;
+  roles: string[];
+  domains: string[];
+  isActive: boolean;
+  order: number;
+}
+
+const INITIAL_PARAMS: Params = {
+  roles: [],
+  domains: [],
+  isActive: false,
+  order: 0,
+};
+
+// --- Custom Hook to detect clicks outside ---
+const useOutsideClick = (ref: any, callback: () => void) => {
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        callback();
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+    };
+  }, [ref, callback]);
+};
+
+// --- NEW: Login Modal Component ---
+interface LoginModalProps {
+  onClose: () => void;
+  onNavigate: () => void;
+}
+
+const LoginModal: React.FC<LoginModalProps> = ({ onClose, onNavigate }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h3>찜하기를 하려면 로그인이 필요해요</h3>
+        <p>계정이 없으시다면</p>
+        <p>지금 바로 회원가입해보세요</p>
+        <button className="modal-btn-login" onClick={onNavigate}>
+          로그인하기
+        </button>
+        <button className="modal-btn-cancel" onClick={onClose}>
+          뒤로 가기
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- HomePage Component ---
 
 const HomePage = () => {
   const { token, logout } = useAuth();
   const [name, setName] = useState<string | null>(null);
+  const navigate = useNavigate(); // Hook for navigation
+
+  // --- NEW State for bookmarks and modal ---
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set<number>());
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const checkToken = async () => {
-      if (!token) return setName(null);
+      if (!token) {
+        setName(null);
+        setBookmarkedIds(new Set()); // Clear bookmarks if not logged in
+        return;
+      }
       try {
         const res = await axios.get(`${API_BASE}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setName(res.data.name);
+        // Assuming the /me endpoint returns a list of bookmarked post IDs
+        // Adjust 'res.data.bookmarkedPostIds' if the API key is different
+        setBookmarkedIds(new Set(res.data.bookmarkedPostIds || []));
       } catch (error) {
         const err = error as AxiosError;
         console.error(err.response?.data);
+        logout(); // Log out if token is invalid
       }
     };
     checkToken();
-  }, [token]);
+  }, [token, logout]);
 
   const [posts, setPosts] = useState<any[]>([]);
+  const [params, setParams] = useState<Params>(INITIAL_PARAMS);
+  const [localParams, setLocalParams] = useState<Params>(INITIAL_PARAMS);
+  const [openFilter, setOpenFilter] = useState<string | null>(null);
 
-  interface Params {
-    [key: string]: string[] | boolean | number;
-    roles: string[];
-    domains: string[];
-    isActive: boolean;
-    order: number;
-  }
-
-  const [params, setParams] = useState<Params>({
-    roles: [],
-    domains: [],
-    isActive: false,
-    order: 0,
+  const filterRef = useRef(null);
+  useOutsideClick(filterRef, () => {
+    if (openFilter !== 'roles') {
+      setOpenFilter(null);
+    }
   });
 
   useEffect(() => {
@@ -85,7 +163,16 @@ const HomePage = () => {
     getPosts();
   }, [params]);
 
-  const toggleRole = (value: string) => {
+  const toggleFilter = (filterName: string) => {
+    if (openFilter === filterName) {
+      setOpenFilter(null);
+    } else {
+      setLocalParams(params);
+      setOpenFilter(filterName);
+    }
+  };
+
+  const toggleRoleDirectly = (value: string) => {
     setParams((prev) => ({
       ...prev,
       roles: prev.roles.includes(value)
@@ -94,8 +181,8 @@ const HomePage = () => {
     }));
   };
 
-  const toggleDomain = (value: string) => {
-    setParams((prev) => ({
+  const toggleLocalDomain = (value: string) => {
+    setLocalParams((prev) => ({
       ...prev,
       domains: prev.domains.includes(value)
         ? prev.domains.filter((v) => v !== value)
@@ -103,22 +190,119 @@ const HomePage = () => {
     }));
   };
 
-  const toggleActive = () => {
-    setParams((prev) => ({
+  const setLocalStatus = (isActive: boolean) => {
+    setLocalParams((prev) => ({
       ...prev,
-      isActive: !prev.isActive,
+      isActive,
     }));
   };
 
-  const changeOrder = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setParams((prev) => ({
+  const setLocalOrder = (order: number) => {
+    setLocalParams((prev) => ({
       ...prev,
-      order: Number(e.target.value),
+      order,
     }));
+  };
+
+  const handleApply = () => {
+    setParams(localParams);
+    setOpenFilter(null);
+  };
+
+  const handleLocalReset = (filterName: string) => {
+    switch (filterName) {
+      case 'status':
+        setLocalParams((prev) => ({
+          ...prev,
+          isActive: INITIAL_PARAMS.isActive,
+        }));
+        break;
+      case 'domains':
+        setLocalParams((prev) => ({
+          ...prev,
+          domains: INITIAL_PARAMS.domains,
+        }));
+        break;
+      case 'order':
+        setLocalParams((prev) => ({ ...prev, order: INITIAL_PARAMS.order }));
+        break;
+    }
+  };
+
+  const resetAllFilters = () => {
+    setParams(INITIAL_PARAMS);
+    setLocalParams(INITIAL_PARAMS);
+    setOpenFilter(null);
+  };
+
+  const getOrderButtonLabel = () => {
+    if (params.order === 0) return '최신순';
+    if (params.order === 2) return '마감임박순';
+    return '최신순';
+  };
+
+  // --- NEW: Bookmark Click Handlers ---
+
+  // This function is called when the user is logged in
+  const handleBookmarkToggle = async (postId: number) => {
+    const isCurrentlyBookmarked = bookmarkedIds.has(postId);
+    const newBookmarkedIds = new Set(bookmarkedIds);
+
+    // Optimistic UI update
+    if (isCurrentlyBookmarked) {
+      newBookmarkedIds.delete(postId);
+    } else {
+      newBookmarkedIds.add(postId);
+    }
+    setBookmarkedIds(newBookmarkedIds);
+
+    // API Call
+    try {
+      const url = `${API_BASE}/api/post/${postId}/bookmark`;
+      if (isCurrentlyBookmarked) {
+        // API call to UN-bookmark
+        await axios.delete(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        // API call to bookmark
+        await axios.post(
+          url,
+          {}, // Empty body
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (error) {
+      // Revert UI on failure
+      setBookmarkedIds(bookmarkedIds);
+      console.error('Failed to update bookmark', error);
+    }
+  };
+
+  // This is the main click handler on the button
+  const handleBookmarkClick = (postId: number) => {
+    if (!token) {
+      // Not logged in: show modal
+      setShowLoginModal(true);
+    } else {
+      // Logged in: toggle the bookmark
+      handleBookmarkToggle(postId);
+    }
   };
 
   return (
     <div className="container">
+      {/* --- NEW: Render Modal --- */}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onNavigate={() => {
+            setShowLoginModal(false);
+            navigate('/login');
+          }}
+        />
+      )}
+
       <header className="header">
         <div className="logo">스누인턴</div>
         <nav className="nav">
@@ -132,89 +316,224 @@ const HomePage = () => {
       </header>
 
       <main className="main-layout">
-        <aside className="sidebar">
-          <h3>직무</h3>
-          {Object.entries(ROLES_OPTIONS).map(([category, values]) => (
-            <div key={category}>
-              <div className="filter-category">{category}</div>
-              {values.map((v) => (
-                <label key={v} className="filter-item">
-                  <input
-                    type="checkbox"
-                    checked={params.roles.includes(v)}
-                    onChange={() => toggleRole(v)}
-                  />
-                  {v}
-                </label>
-              ))}
+        {/* --- Filters Container --- */}
+        <div className="filters-container">
+          {/* 1. 직군 필터 (Large Button) */}
+          <div className="filter-dropdown filter-dropdown-roles">
+            <button
+              className={`filter-btn-roles ${openFilter === 'roles' ? 'active' : ''}`}
+              onClick={() => toggleFilter('roles')}
+            >
+              <span>직군 필터</span>
+              <span
+                className={`filter-arrow ${openFilter === 'roles' ? 'open' : ''}`}
+              >
+                ▼
+              </span>
+            </button>
+
+            <div
+              className={`roles-dropdown-wrapper ${openFilter === 'roles' ? 'open' : ''}`}
+            >
+              <div className="dropdown-content">
+                {Object.entries(ROLES_OPTIONS).map(([group, roles]) => (
+                  <div key={group} className="filter-group">
+                    <h4>{group}</h4>
+                    {roles.map((role) => (
+                      <label key={role} className="checkbox-option">
+                        <input
+                          type="checkbox"
+                          checked={params.roles.includes(role)}
+                          onChange={() => toggleRoleDirectly(role)}
+                        />
+                        {role}
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
 
-          <h3>도메인</h3>
-          {DOMAIN_OPTIONS.map((d) => (
-            <label key={d} className="filter-item">
-              <input
-                type="checkbox"
-                checked={params.domains.includes(d)}
-                onChange={() => toggleDomain(d)}
-              />
-              {d}
-            </label>
-          ))}
+          {/* 2. Secondary Filter Bar (Status, Domain, Order, Reset) */}
+          <div className="filter-bar" ref={filterRef}>
+            {/* ... (rest of your filters are unchanged) ... */}
+            {/* 모집상태 Dropdown */}
+            <div className="filter-dropdown">
+              <button
+                className={`filter-btn ${openFilter === 'status' ? 'active' : ''}`}
+                onClick={() => toggleFilter('status')}
+              >
+                모집상태 ▼
+              </button>
+              {openFilter === 'status' && (
+                <div className="dropdown-menu">
+                  <div className="dropdown-content">
+                    <label className="radio-option">
+                      <input
+                        type="radio"
+                        name="status"
+                        checked={!localParams.isActive}
+                        onChange={() => setLocalStatus(false)}
+                      />
+                      전체
+                    </label>
+                    <label className="radio-option">
+                      <input
+                        type="radio"
+                        name="status"
+                        checked={localParams.isActive}
+                        onChange={() => setLocalStatus(true)}
+                      />
+                      모집중
+                    </label>
+                  </div>
+                  <div className="dropdown-footer">
+                    <button
+                      className="btn-reset"
+                      onClick={() => handleLocalReset('status')}
+                    >
+                      초기화
+                    </button>
+                    <button className="btn-apply" onClick={handleApply}>
+                      적용
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <h3>모집 상태</h3>
-          <label className="filter-item">
-            <input
-              type="checkbox"
-              checked={params.isActive}
-              onChange={toggleActive}
-            />
-            모집중만 보기
-          </label>
+            {/* 업종 Dropdown */}
+            <div className="filter-dropdown">
+              <button
+                className={`filter-btn ${openFilter === 'domains' ? 'active' : ''}`}
+                onClick={() => toggleFilter('domains')}
+              >
+                업종 ▼
+              </button>
+              {openFilter === 'domains' && (
+                <div className="dropdown-menu">
+                  <div className="dropdown-content">
+                    <label className="checkbox-option">
+                      <input
+                        type="checkbox"
+                        checked={localParams.domains.length === 0}
+                        onChange={() => handleLocalReset('domains')}
+                      />
+                      전체
+                    </label>
+                    {DOMAIN_OPTIONS.map((domain) => (
+                      <label key={domain} className="checkbox-option">
+                        <input
+                          type="checkbox"
+                          checked={localParams.domains.includes(domain)}
+                          onChange={() => toggleLocalDomain(domain)}
+                        />
+                        {DOMAIN_LABELS[domain] || domain}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="dropdown-footer">
+                    <button
+                      className="btn-reset"
+                      onClick={() => handleLocalReset('domains')}
+                    >
+                      초기화
+                    </button>
+                    <button className="btn-apply" onClick={handleApply}>
+                      적용
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <h3>정렬</h3>
-          <select
-            value={params.order}
-            onChange={changeOrder}
-            className="filter-select"
-          >
-            {ORDER_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </aside>
+            {/* 정렬 Dropdown */}
+            <div className="filter-dropdown">
+              <button
+                className={`filter-btn ${openFilter === 'order' ? 'active' : ''}`}
+                onClick={() => toggleFilter('order')}
+              >
+                {getOrderButtonLabel()} ▼
+              </button>
+              {openFilter === 'order' && (
+                <div className="dropdown-menu">
+                  <div className="dropdown-content">
+                    {ORDER_VALUES.map((value) => (
+                      <label key={value} className="radio-option">
+                        <input
+                          type="radio"
+                          name="order"
+                          checked={localParams.order === value}
+                          onChange={() => setLocalOrder(value)}
+                        />
+                        {ORDER_LABELS[value]}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="dropdown-footer">
+                    <button
+                      className="btn-reset"
+                      onClick={() => handleLocalReset('order')}
+                    >
+                      초기화
+                    </button>
+                    <button className="btn-apply" onClick={handleApply}>
+                      적용
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
-        <section className="posts-section">
+            <button className="btn-reset-all" onClick={resetAllFilters}>
+              ↻ 초기화
+            </button>
+          </div>
+        </div>
+
+        {/* --- Job Posts --- */}
+        <section className="job-grid">
           {posts.length === 0 ? (
             <p>검색 결과가 없습니다.</p>
           ) : (
             posts.map((post) => {
-              const isClosed = new Date(post.employmentEndDate) < new Date();
+              const dDay = Math.ceil(
+                (new Date(post.employmentEndDate).getTime() - Date.now()) /
+                  (1000 * 60 * 60 * 24)
+              );
+              const isClosed = dDay < 0;
+              const isBookmarked = bookmarkedIds.has(post.id);
+
               return (
-                <div key={post.id} className="post-card">
-                  <div className="post-card-header">
-                    <h4>{post.positionTitle}</h4>
-                    <span className="badge">
-                      {isClosed ? '마감' : '모집 중'}
-                    </span>
+                <div key={post.id} className="job-card">
+                  <div className="job-card-header">
+                    <div className="company-info">
+                      <img
+                        src={post.companyLogoUrl || '/placeholder-logo.png'}
+                        alt={post.companyName}
+                        className="company-logo"
+                      />
+                      <span className="company-name">{post.companyName}</span>
+                    </div>
+                    {/* --- UPDATED: Bookmark Button --- */}
+                    <button
+                      className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                      onClick={() => handleBookmarkClick(post.id)}
+                    ></button>
                   </div>
 
-                  <div className="company">{post.companyName}</div>
+                  <h3 className="job-title">{post.positionTitle}</h3>
 
-                  <div className="info">
-                    {post.positionType} 개발 {post.headCount}명
+                  <div className="job-meta">
+                    <span className="job-tag">{post.positionType}</span>
                   </div>
 
-                  <p className="summary">{post.detailSummary}</p>
+                  <span className="job-deadline">
+                    {isClosed ? '마감' : `마감까지 D-${dDay}`}
+                  </span>
 
-                  <div className="tags">
-                    <span>{post.location}</span>
-                    {post.tags?.map((t: any) => (
-                      <span key={t.tag}>{t.tag}</span>
-                    ))}
-                  </div>
+                  <p className="job-summary">{post.detailSummary}</p>
                 </div>
               );
             })
