@@ -14,7 +14,6 @@ export const encodeQueryParams = ({
   >;
 }) => {
   const queryParameters = new URLSearchParams();
-
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null) return; // null, undefined 제외
 
