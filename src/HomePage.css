@@ -1,10 +1,10 @@
-/* 기본 설정 */
 body {
   font-family: "Noto Sans KR", sans-serif;
   background-color: #fff;
   margin: 0;
   padding: 0;
-  text-align: center;
+  /* Set background for the whole page to match screenshot context */
+  background-color: #f9fafb;
 }
 
 .container {
@@ -13,7 +13,6 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -32,10 +31,8 @@ body {
 .nav {
   display: flex;
   align-items: center;
-  white-space: nowrap; /* ✅ 줄바꿈 방지 */
 }
 
-/* 🔹 공통 스타일 (회원가입 / 로그인 / 로그아웃 / 이름 표시용 모두 동일 기본 스타일) */
 .nav a,
 .nav span {
   margin-left: 24px;
@@ -45,15 +42,445 @@ body {
   cursor: pointer;
 }
 
-/* 🔹 hover 효과 — LoginPage.css와 동일 (색상만 진하게) */
 .nav a:hover {
   color: #000;
 }
 
-/* 🔹 이름 표시용 span — hover 효과 제거 */
-.nav span {
-  cursor: default;
+/* ---- New Filter Bar ---- */
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 0 20px;
+  position: relative;
+  box-sizing: border-box;
 }
-.nav span:hover {
+
+.filter-dropdown-roles {
+  width: 100%;
+  position: relative;
+}
+
+.filter-btn-roles {
+  width: 100%;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn-roles:hover {
+  background-color: #e5e7eb;
+}
+.filter-btn-roles.active {
+  border-color: #1e3a8a;
+  background-color: #f3f4f6;
+  color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+/* Animated arrow on the roles filter button */
+.filter-arrow {
+  transition: transform 0.3s ease-out;
+}
+.filter-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Styles for the sliding roles filter container */
+.roles-dropdown-wrapper {
+  /* This is the animation */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease-out, opacity 0.3s ease-out;
+
+  /* This is the styling */
+  background: #fff; /* Keep the white background */
+  text-align: left;
+  /* Removed border, border-radius, box-shadow, and margin-top */
+}
+.roles-dropdown-wrapper.open {
+  /* Set to a value larger than your content will ever be */
+  max-height: 600px;
+  opacity: 1;
+}
+
+.filter-bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn:hover {
+  background-color: #f9fafb;
+}
+.filter-btn.active {
+  border-color: #1e3a8a;
+  color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+}
+
+.btn-reset-all {
+  margin-left: auto;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.btn-reset-all:hover {
+  background-color: #f1f1f1;
+}
+
+/* ---- Dropdown Menu Content ---- */
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 280px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  text-align: left;
+  overflow: hidden;
+}
+
+.dropdown-content {
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.radio-option,
+.checkbox-option {
+  display: block;
+  padding: 6px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+.radio-option input,
+.checkbox-option input {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.filter-group {
+  margin-bottom: 12px;
+}
+.filter-group h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin: 8px 0 4px;
+}
+
+.dropdown-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #f1f1f1;
+  background-color: #f9fafb;
+}
+
+.btn-reset {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-reset:hover {
+  color: #111;
+}
+
+.btn-apply {
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-apply:hover {
+  background-color: #1c337a;
+}
+
+/* ---- Job Card Grid (3 columns) ---- */
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 한 줄에 3개 */
+  gap: 24px; /* 카드 간 간격 */
+  padding: 20px;
+  max-width: 1200px; /* 중앙 정렬을 위해 컨테이너 폭 제한 */
+  margin: 0 auto; /* 가운데 정렬 */
+  background-color: #f9fafb;
+}
+
+.job-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 아래 요소가 내려가지 않도록 배치 */
+  height: 300px; /* 원하는 높이로 조절 */
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .job-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .job-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-width: 0; /* 추가 */
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Increased gap */
+}
+
+.company-logo {
+  width: 48px; /* Bigger logo */
+  height: 48px;
+  border-radius: 8px; /* Rounded square */
+  object-fit: cover;
+  border: 1px solid #f1f1f1;
+}
+
+.company-name {
+  font-size: 16px; /* Bigger text */
+  font-weight: 600; /* Bolder */
   color: #333;
+}
+
+.job-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  min-width: 0; /* ✅ 핵심 */
+}
+
+.job-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 10px 0 8px;
+  color: #111;
+
+  /* --- 텍스트 한 줄에서 ... 처리 핵심 --- */
+  min-width: 0; /* ← 이것이 핵심 */
+  white-space: nowrap; /* 줄 바꿈 금지 */
+  overflow: hidden; /* 넘친 텍스트 숨김 */
+  text-overflow: ellipsis; /* … 표시 */
+  width: 100%; /* 컨테이너 기준으로 자르기 */
+  display: block; /* width 제대로 적용하려면 block 필요 */
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  min-height: 22px; /* 고정 높이 */
+  margin-bottom: 4px;
+}
+
+.job-tag {
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  padding: 4px 10px; /* More padding */
+  font-size: 14px; /* Slightly larger tag */
+  font-weight: 500;
+  color: #333;
+}
+
+.job-deadline {
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+
+  margin-bottom: 10px;
+
+  height: 20px;
+  display: flex;
+  align-items: center;
+
+  margin-left: auto; /* 오른쪽 끝으로 이동 */
+  text-align: right;
+}
+
+.job-summary {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+
+  /* 멀티라인 말줄임 설정 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Chrome, Edge, Safari */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  /* 표준 문법 (지원 아직 낮지만 lint 오류 해결) */
+  line-clamp: 3;
+
+  /* 정확했던 높이를 유지하고 싶다면 */
+  max-height: calc(1.4em * 3);
+}
+
+.company-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  background-color: #e5e7eb; /* 연한 회색 */
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* ---- THE FINAL BOOKMARK FIX ---- */
+
+/* ---- Updated Bookmark Button Styles ---- */
+
+/* ---- Bookmark Button (single source of truth) ---- */
+.bookmark-btn {
+  /* 기본(미선택) 상태: 밝은 회색 채움 */
+  background: #e5e7eb;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 미선택 상태에서 hover */
+.bookmark-btn:hover {
+  background: #d4d6da;
+  border-color: #d4d6da;
+}
+
+/* 선택(북마크됨) 상태 */
+.bookmark-btn.bookmarked {
+  background: #333;
+  border-color: #333;
+}
+
+/* 선택 상태에서 hover */
+.bookmark-btn.bookmarked:hover {
+  background: #222;
+  border-color: #222;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 350px;
+  width: 90%;
+  box-sizing: border-box;
+}
+
+.modal-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px;
+}
+
+.modal-content p {
+  font-size: 15px;
+  color: #555;
+  margin: 2px 0;
+}
+
+.modal-btn-login {
+  display: block;
+  width: 100%;
+  background-color: #4b5563; /* Dark grey */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+}
+
+.modal-btn-cancel {
+  display: block;
+  width: 100%;
+  background-color: #f3f4f6; /* Light grey */
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
 }
