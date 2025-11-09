@@ -12,10 +12,16 @@ const API_BASE = 'https://api-internhasha.wafflestudio.com';
 
 // ... (Filter options and other constants remain the same) ...
 const ROLES_OPTIONS = {
-  개발: ['FRONT', 'APP', 'BACKEND', 'DATA', 'OTHERS'],
-  디자인: ['DESIGN'],
-  기획: ['PLANNER'],
-  마케팅: ['MARKETING'],
+  개발: {
+    '프론트엔드 개발': 'FRONT',
+    '앱 개발': 'APP',
+    '서버·백엔드 개발': 'BACKEND',
+    '데이터 분석': 'DATA',
+    기타: 'OTHERS',
+  },
+  디자인: { 디자인: 'DESIGN' },
+  기획: { 기획: 'PLANNER' },
+  마케팅: { 마케팅: 'MARKETING' },
 };
 const DOMAIN_LABELS: { [key: string]: string } = {
   FINTECH: '핀테크',
@@ -149,8 +155,16 @@ const HomePage = () => {
   // 2. Add new state for pagination
   const [totalPages, setTotalPages] = useState(1);
 
-  const filterRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(filterRef, () => setOpenFilter(null));
+  const rolesFilterRef = useRef<HTMLDivElement>(null);
+  const otherFiltersRef = useRef<HTMLDivElement>(null);
+
+  useOutsideClick(rolesFilterRef, () => {
+    if (openFilter === 'roles') setOpenFilter(null);
+  });
+
+  useOutsideClick(otherFiltersRef, () => {
+    if (openFilter !== 'roles' && openFilter !== null) setOpenFilter(null);
+  });
 
   // 4. Update useEffect to depend on currentPage and send it
   useEffect(() => {
@@ -163,7 +177,7 @@ const HomePage = () => {
         const res = await axios.get(`${API_BASE}/api/post?${query}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-
+        // console.log(res.data);
         setPosts(res.data.posts);
         setTotalPages(res.data.paginator.lastPage);
 
@@ -181,11 +195,16 @@ const HomePage = () => {
 
   const toggleFilter = (filterName: string) => {
     if (openFilter === filterName) {
-      setOpenFilter(null);
-    } else {
-      setLocalParams(params);
-      setOpenFilter(filterName);
+      setOpenFilter(null); // 같은 버튼 누르면 닫힘
+      return;
     }
+
+    // roles는 params 그대로 사용 (localParams 사용 안 함)
+    if (filterName !== 'roles') {
+      setLocalParams(params);
+    }
+
+    setOpenFilter(filterName);
   };
 
   // 3. Reset page to 1 when filters change
@@ -197,6 +216,26 @@ const HomePage = () => {
         : [...prev.roles, value],
     }));
     setPage(1); // Reset page
+  };
+
+  const toggleSelectAllRolesInGroup = (roleValues: string[]) => {
+    const hasAllSelected = roleValues.every((v) => params.roles.includes(v));
+
+    if (hasAllSelected) {
+      // 전체 해제
+      setParams((prev) => ({
+        ...prev,
+        roles: prev.roles.filter((role) => !roleValues.includes(role)),
+      }));
+    } else {
+      // 전체 선택
+      setParams((prev) => ({
+        ...prev,
+        roles: Array.from(new Set([...prev.roles, ...roleValues])),
+      }));
+    }
+
+    setPage(1);
   };
 
   const setPage = (page: number) => {
@@ -344,7 +383,10 @@ const HomePage = () => {
         <div className="filters-container">
           {/* ... (All your filters remain the same) ... */}
           {/* 1. 직군 필터 (Large Button) */}
-          <div className="filter-dropdown filter-dropdown-roles">
+          <div
+            className="filter-dropdown filter-dropdown-roles"
+            ref={rolesFilterRef}
+          >
             <button
               className={`filter-btn-roles ${openFilter === 'roles' ? 'active' : ''}`}
               onClick={() => toggleFilter('roles')}
@@ -361,27 +403,49 @@ const HomePage = () => {
               className={`roles-dropdown-wrapper ${openFilter === 'roles' ? 'open' : ''}`}
             >
               <div className="dropdown-content">
-                {Object.entries(ROLES_OPTIONS).map(([group, roles]) => (
-                  <div key={group} className="filter-group">
-                    <h4>{group}</h4>
-                    {roles.map((role) => (
-                      <label key={role} className="checkbox-option">
+                {Object.entries(ROLES_OPTIONS).map(([group, roles]) => {
+                  const roleEntries = Object.entries(roles);
+                  const roleValues = roleEntries.map(([_, value]) => value);
+                  const allSelected = roleValues.every((v) =>
+                    params.roles.includes(v)
+                  );
+
+                  return (
+                    <div key={group} className="filter-group">
+                      <h4>{group}</h4>
+
+                      {/* ✅ 전체 선택 추가 */}
+                      <label className="checkbox-option">
                         <input
                           type="checkbox"
-                          checked={params.roles.includes(role)}
-                          onChange={() => toggleRoleDirectly(role)}
+                          checked={allSelected}
+                          onChange={() =>
+                            toggleSelectAllRolesInGroup(roleValues)
+                          }
                         />
-                        {role}
+                        전체 선택
                       </label>
-                    ))}
-                  </div>
-                ))}
+
+                      {/* 기존 체크박스들 */}
+                      {roleEntries.map(([key, value]) => (
+                        <label key={value} className="checkbox-option">
+                          <input
+                            type="checkbox"
+                            checked={params.roles.includes(value)}
+                            onChange={() => toggleRoleDirectly(value)}
+                          />
+                          {key}
+                        </label>
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* 2. Secondary Filter Bar (Status, Domain, Order, Reset) */}
-          <div className="filter-bar" ref={filterRef}>
+          <div className="filter-bar" ref={otherFiltersRef}>
             {/* 모집상태 Dropdown */}
             <div className="filter-dropdown">
               <button
@@ -527,7 +591,6 @@ const HomePage = () => {
                 (new Date(post.employmentEndDate).getTime() - Date.now()) /
                   (1000 * 60 * 60 * 24)
               );
-              const isClosed = dDay < 0;
 
               return (
                 <div key={post.id} className="job-card">
@@ -550,7 +613,13 @@ const HomePage = () => {
                   </div>
 
                   <span className="job-deadline">
-                    {isClosed ? '마감' : `마감까지 D-${dDay}`}
+                    {!post.employmentEndDate
+                      ? '상시모집'
+                      : dDay < 0
+                        ? '마감'
+                        : dDay == 0
+                          ? 'D-Day'
+                          : `마감까지 D-${dDay}`}
                   </span>
 
                   <p className="job-summary">{post.detailSummary}</p>
