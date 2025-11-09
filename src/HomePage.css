@@ -245,7 +245,7 @@ body {
 /* ---- Job Card Grid (3 columns) ---- */
 .job-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 한 줄에 3개 */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 한 줄에 3개 */
   gap: 24px; /* 카드 간 간격 */
   padding: 20px;
   max-width: 1200px; /* 중앙 정렬을 위해 컨테이너 폭 제한 */
@@ -263,18 +263,7 @@ body {
   justify-content: flex-start; /* 아래 요소가 내려가지 않도록 배치 */
   height: 300px; /* 원하는 높이로 조절 */
   box-sizing: border-box;
-}
-
-@media (max-width: 1024px) {
-  .job-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .job-grid {
-    grid-template-columns: 1fr;
-  }
+  min-width: 0; /* 💥 이것이 없으면 ellipsis 절대 안 됨 */
 }
 
 .job-card-header {
