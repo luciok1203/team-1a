@@ -1,0 +1,93 @@
+.mypage-container {
+  font-family: "Noto Sans KR", sans-serif;
+  text-align: center;
+}
+
+/* --- Header --- */
+.mypage-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.nav-left {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.nav-right a {
+  margin-left: 24px;
+  text-decoration: none;
+  color: #333;
+  font-size: 15px;
+}
+
+/* --- Title --- */
+.mypage-title {
+  margin-top: 50px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* --- Tabs --- */
+.mypage-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 32px;
+  margin-bottom: 40px;
+  align-items: center;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding-bottom: 4px;
+  cursor: pointer;
+  color: #777;
+}
+
+.tab-btn.active {
+  font-weight: 700;
+  color: #000;
+  border-bottom: 2px solid #000;
+}
+
+.profile-create-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* --- Empty Profile Box --- */
+.no-profile-box {
+  margin-top: 40px;
+}
+
+.no-profile-box h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.no-profile-box p {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.profile-write-btn {
+  padding: 14px 28px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}

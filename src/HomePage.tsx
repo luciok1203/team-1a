@@ -122,7 +122,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onNavigate }) => {
 // --- HomePage Component ---
 const HomePage = () => {
   const { token, logout } = useAuth();
-  const [name, setName] = useState<string | null>(null);
   const navigate = useNavigate();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -130,14 +129,14 @@ const HomePage = () => {
     // ... (checkToken logic remains the same) ...
     const checkToken = async () => {
       if (!token) {
-        setName(null);
+        // setName(null);
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE}/api/auth/me`, {
+        await axios.get(`${API_BASE}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setName(res.data.name);
+        // setName(res.data.name);
       } catch (error) {
         const err = error as AxiosError;
         console.error(err.response?.data);
@@ -368,12 +367,18 @@ const HomePage = () => {
       {/* ... (Header remains the same) ... */}
       <header className="header">
         <div className="logo">스누인턴</div>
+
         <nav className="nav">
-          {name ? <span>{name}님</span> : <Link to="/signup">회원가입</Link>}
-          {name ? (
-            <a onClick={logout}>로그아웃</a>
+          {!token ? (
+            <>
+              <Link to="/signup">회원가입</Link>
+              <Link to="/login">로그인</Link>
+            </>
           ) : (
-            <Link to="/login">로그인</Link>
+            <>
+              <Link to="/mypage">마이페이지</Link>
+              <a onClick={logout}>로그아웃</a>
+            </>
           )}
         </nav>
       </header>
