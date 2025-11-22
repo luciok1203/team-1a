@@ -1,6 +1,13 @@
+/* MyPage.css */
+
 .mypage-container {
   font-family: "Noto Sans KR", sans-serif;
   text-align: center;
+}
+
+.mypage-inner {
+  width: 600px;
+  margin: 0 auto;
 }
 
 /* --- Header --- */
@@ -12,16 +19,18 @@
   background-color: #fafafa;
 }
 
-.nav-left {
+.logo {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
+  color: #1e3a8a;
 }
 
-.nav-right a {
+.nav a {
   margin-left: 24px;
   text-decoration: none;
   color: #333;
   font-size: 15px;
+  cursor: pointer; /* 추가: 링크 커서 */
 }
 
 /* --- Title --- */
@@ -29,16 +38,24 @@
   margin-top: 50px;
   font-size: 28px;
   font-weight: 700;
+  text-align: left;
 }
 
-/* --- Tabs --- */
+/* --- Tabs (수정됨) --- */
 .mypage-tabs {
   display: flex;
-  justify-content: center;
-  gap: 24px;
+  justify-content: space-between; /* 수정: 양쪽 끝으로 배분 */
+  align-items: center;
   margin-top: 32px;
   margin-bottom: 40px;
-  align-items: center;
+  width: 100%; /* 부모(mypage-inner) 너비 꽉 채움 */
+  /* gap: 24px;  -> 삭제 (내부 그룹으로 이동) */
+}
+
+/* 추가된 클래스: 왼쪽 탭 버튼들을 묶어주는 역할 */
+.tabs-left {
+  display: flex;
+  gap: 24px; /* 탭 사이의 간격은 여기서 유지 */
 }
 
 .tab-btn {
@@ -48,6 +65,7 @@
   padding-bottom: 4px;
   cursor: pointer;
   color: #777;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
 
 .tab-btn.active {
@@ -63,6 +81,7 @@
   border-radius: 8px;
   font-size: 15px;
   cursor: pointer;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
 
 /* --- Empty Profile Box --- */
@@ -91,3 +110,106 @@
   font-size: 16px;
   cursor: pointer;
 }
+
+.profile-info-container {
+  text-align:left;
+}
+
+/* MyPage.css */
+
+/* ... (상단 Header, Title, Tabs 스타일은 기존 유지) ... */
+
+/* --- Job List Styles (New Row Layout) --- */
+
+.tab-content-bookmarks {
+  width: 100%;
+}
+
+.empty-message {
+  margin-top: 60px;
+  color: #999;
+  font-size: 15px;
+}
+
+.job-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* 박스 사이 간격 */
+}
+
+/* 각 공고 박스 스타일 */
+.job-row-item {
+  display: flex;
+  justify-content: space-between; /* 왼쪽 그룹과 오른쪽 그룹을 양 끝으로 배치 */
+  align-items: center; /* 세로 중앙 정렬 */
+  padding: 20px 24px;
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px; /* 모서리 둥글게 */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* 아주 살짝 그림자 */
+}
+
+/* --- 왼쪽 그룹 (아이콘 + 회사명) --- */
+.job-left-group {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 아이콘과 회사명 사이 간격 */
+}
+
+.bookmark-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: transform 0.1s;
+}
+.bookmark-icon-btn:hover {
+  transform: scale(1.1);
+}
+
+.company-name {
+  font-size: 16px;
+  font-weight: 700; /* 굵게 (이미지의 000 회사) */
+  color: #111;
+}
+
+/* --- 오른쪽 그룹 (제목 + 마감정보) --- */
+.job-right-group {
+  display: flex;
+  flex-direction: column; /* 위아래 배치 */
+  align-items: flex-end; /* 오른쪽 정렬 */
+  gap: 6px; /* 제목과 마감정보 사이 간격 */
+}
+
+.job-title {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500; /* 제목은 회사명보다 덜 굵게 */
+}
+
+.job-status {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 상태별 색상 클래스 */
+.status-red {
+  color: #dc2626; /* 마감 - 빨강 */
+}
+
+.status-blue {
+  color: #2563eb; /* 상시/D-Day - 파랑 */
+}
+
+/* --- Profile Styles (기존 유지) --- */
+.profile-summary-box {
+  text-align: left;
+  padding: 24px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  margin-top: 20px;
+  background-color: #fff;
+}
+/* ... */

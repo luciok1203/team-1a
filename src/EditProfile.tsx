@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-// We reuse the existing CSS to guarantee the exact same design
+// CreateProfile.tsx
+
+import React, { useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import './CreateProfile.css';
 
 interface SubMajor {
@@ -11,6 +13,8 @@ interface SubMajor {
 const EditProfile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { logout } = useAuth();
 
   // --- State ---
   const [studentId, setStudentId] = useState('');
@@ -23,32 +27,20 @@ const EditProfile = () => {
   const [majorError, setMajorError] = useState(false);
   const [fileError, setFileError] = useState(false);
 
-  // --- 1. PRE-FILL DATA (The key difference for Edit Page) ---
-  useEffect(() => {
-    // In a real app, you would fetch this data from an API
-    // Here we mock the data shown in your screenshot
-    const loadUserData = () => {
-      setStudentId('25');
-      setMainMajor('컴공');
-      setSubMajors([{ id: Date.now(), value: '조경' }]);
-      setFileName('인턴하샤_이력서.pdf');
-    };
-
-    loadUserData();
-  }, []);
-
-  // --- Handlers (Same as CreateProfile) ---
+  // --- Handlers ---
 
   // 1. Student ID Logic
   const handleStudentIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (/^\d{0,2}$/.test(val)) {
       setStudentId(val);
+      // Clear error while typing if it becomes valid
       if (val.length === 2) setIdError(false);
     }
   };
 
   const handleStudentIdBlur = () => {
+    // Trigger validation when user leaves the input field
     if (studentId.length !== 2) {
       setIdError(true);
     }
@@ -87,11 +79,12 @@ const EditProfile = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
 
+      // Check file size
       if (file.size > maxSize) {
         setFileError(true);
-        setFileName('');
+        setFileName(''); // Reject the file
         if (fileInputRef.current) fileInputRef.current.value = '';
       } else {
         setFileError(false);
@@ -102,60 +95,60 @@ const EditProfile = () => {
 
   const handleDeleteFile = () => {
     setFileName('');
-    setFileError(false);
+    setFileError(false); // Reset error when deleting (optional, or keep it if mandatory)
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  // 4. Save Logic
+  // 4. Save / Submit Logic
   const handleSave = () => {
     let isValid = true;
 
+    // Validate Student ID
     if (studentId.length !== 2) {
       setIdError(true);
       isValid = false;
     }
+
+    // Validate Main Major
     if (mainMajor.trim() === '') {
       setMajorError(true);
       isValid = false;
     }
+
+    // Validate File
     if (!fileName) {
       setFileError(true);
       isValid = false;
     }
 
     if (isValid) {
-      // API call to update data would go here
-      alert('프로필이 수정되었습니다.'); // Optional feedback
+      // Proceed with save API call
+      // navigate('/next-page');
     }
   };
 
   return (
-    // We use the exact same container class to keep styles identical
-    <div className="create-profile-container">
+    <div className="container">
       {/* --- Header --- */}
-      <header className="cp-header">
-        <div className="cp-logo">인턴하샤</div>
-        <div className="cp-menu-icon">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+      <header className="header">
+        <div className="logo">스누인턴</div>
+        <nav className="nav">
+          <Link to="/mypage">마이페이지</Link>
+          <a
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
           >
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </div>
+            로그아웃
+          </a>
+        </nav>
       </header>
 
       <div className="cp-content">
-        {/* Title changed to '프로필 수정' */}
-        <h1 className="cp-title">프로필 수정</h1>
+        <h1 className="cp-title">프로필 생성</h1>
 
         <h2 className="cp-section-title">필수 작성 항목</h2>
         <p className="cp-description">아래 항목은 필수로 작성해주세요.</p>
@@ -195,7 +188,7 @@ const EditProfile = () => {
               className={`cp-input ${majorError ? 'input-error' : ''}`}
               value={mainMajor}
               onChange={handleMainMajorChange}
-              placeholder="주전공 학과명을 입력해주세요."
+              placeholder="주전공 학과명을 입력해주세요. (예시: 컴퓨터공학부, 경제학부 등)"
             />
           </div>
 

@@ -366,7 +366,14 @@ const HomePage = () => {
 
       {/* ... (Header remains the same) ... */}
       <header className="header">
-        <div className="logo">스누인턴</div>
+        <div
+          className="logo"
+          onClick={() => {
+            navigate('/');
+          }}
+        >
+          스누인턴
+        </div>
 
         <nav className="nav">
           {!token ? (
@@ -376,7 +383,7 @@ const HomePage = () => {
             </>
           ) : (
             <>
-              <Link to="/mypage">마이페이지</Link>
+              <Link to="/mypage?tab=bookmarks">마이페이지</Link>
               <a onClick={logout}>로그아웃</a>
             </>
           )}
