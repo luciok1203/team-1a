@@ -74,6 +74,7 @@ const CreateProfile = () => {
       if (cvKey) {
         // 예: "static/private/CV/hash_date/filename.pdf" -> "filename.pdf"
         const name = cvKey.split('/').pop();
+        // console.log(name);
         setFileName(name || '');
       }
     }
